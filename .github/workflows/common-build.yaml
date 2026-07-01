@@ -1,0 +1,50 @@
+name: common-build.yaml
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        description: 'Project name'
+        required: true
+        type: string
+      project-path:
+        description: 'Project path'
+        required: true
+        type: string
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  CI_DEPLOY_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
+  CI_DEPLOY_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
+
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  pull-requests: write
+  attestations: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build ${{ inputs.project-name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Java setup
+        uses: ./.github/actions/java-setup
+        with:
+          project-path: ${{ inputs.project-path }}
+
+      - name: Configure git
+        uses: ./.github/actions/configure-git
+
+      - name: Download deps and plugins
+        run: mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies -s ./settings.xml
+
+      - name: Build
+        uses: ./.github/actions/build-deploy
+        with:
+          branch: ${{ github.ref_name }}
+          project-path: ${{ inputs.project-path }}
