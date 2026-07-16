@@ -15,7 +15,7 @@
     execution time, without requiring changes to the original scripts.</description>
 
   <properties>
-    <fluxnova.version>3.0.0-SNAPSHOT</fluxnova.version>
+    <fluxnova.version>3.0.0</fluxnova.version>
     <java.version>21</java.version>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -16,7 +16,7 @@
         <module>fluxnova-backward-compatibility-plugin</module>
     </modules>
     <properties>
-        <fluxnova.version>3.0.0-SNAPSHOT</fluxnova.version>
+        <fluxnova.version>3.0.0</fluxnova.version>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

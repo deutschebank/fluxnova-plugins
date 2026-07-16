@@ -1,4 +1,4 @@
-name: "Agentic Plugin Build"
+name: "Agentic-Subprocess Plugin Build"
 
 on:
   push:
