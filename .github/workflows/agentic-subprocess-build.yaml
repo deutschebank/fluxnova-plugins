@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     paths:
-      - "agentic/**"
+      - "agentic-subprocess/**"
       - ".github/**"
       - "pom.xml"
   workflow_dispatch:
@@ -20,6 +20,6 @@ jobs:
   build:
     uses: ./.github/workflows/common-build.yaml
     with:
-      project-name: "agentic"
-      project-path: "agentic"
+      project-name: "agentic-subprocess"
+      project-path: "agentic-subprocess"
     secrets: inherit
