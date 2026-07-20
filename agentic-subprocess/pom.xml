@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
     <name>Fluxnova Platform - engine plugins - agentic</name>
     <modules>
+        <module>shared</module>
         <module>agent-config</module>
         <module>agent-tool-context-discovery</module>
         <module>agent-llm-connector</module>
