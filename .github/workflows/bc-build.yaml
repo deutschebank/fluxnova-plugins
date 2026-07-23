@@ -20,6 +20,5 @@ jobs:
   build:
     uses: ./.github/workflows/common-build.yaml
     with:
-      project-name: "fluxnova-backward-compatibility-plugin"
-      project-path: "fluxnova-backward-compatibility-plugin"
+      project-id: "fluxnova-backward-compatibility-plugin"
     secrets: inherit

@@ -20,6 +20,5 @@ jobs:
   build:
     uses: ./.github/workflows/common-build.yaml
     with:
-      project-name: "agentic-subprocess"
-      project-path: "agentic-subprocess"
+      project-id: "agentic-subprocess"
     secrets: inherit

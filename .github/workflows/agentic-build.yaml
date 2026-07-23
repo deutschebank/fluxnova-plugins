@@ -20,6 +20,5 @@ jobs:
   build:
     uses: ./.github/workflows/common-build.yaml
     with:
-      project-name: "agentic"
-      project-path: "agentic"
+      project-id: "agentic"
     secrets: inherit
