@@ -9,7 +9,7 @@
         <groupId>org.finos.fluxnova.bpm</groupId>
         <artifactId>fluxnova-plugins</artifactId>
         <version>1.0.0</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>fluxnova-engine-plugins-qa</artifactId>
     <packaging>pom</packaging>
