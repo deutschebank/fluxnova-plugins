@@ -32,7 +32,7 @@
     <plugin.version.source>3.3.1</plugin.version.source>
     <gpg.executable>gpg</gpg.executable>
     <release.goals>deploy org.sonatype.plugins:nexus-staging-maven-plugin:1.6.13:close</release.goals>
-    <release.goals>install org.sonatype.central:central-publishing-maven-plugin:0.9.0:publish</release.goals>
+<!--    <release.goals>install org.sonatype.central:central-publishing-maven-plugin:0.9.0:publish</release.goals>-->
     <plugin.version.publish>0.9.0</plugin.version.publish>
     <plugin.version.deploy>3.1.4</plugin.version.deploy>
     <publish.server.id>ossrh</publish.server.id>
