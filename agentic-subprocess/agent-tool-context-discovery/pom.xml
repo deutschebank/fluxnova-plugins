@@ -13,9 +13,6 @@
     <packaging>jar</packaging>
     <name>Fluxnova Platform - engine plugins - ai - agent tool context discovery</name>
     <description>Discovers available tools and resolves runtime context for agentic BPMN subprocesses</description>
-    <properties>
-        <fluxnova.version>3.0.0-SNAPSHOT</fluxnova.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.finos.fluxnova.bpm</groupId>

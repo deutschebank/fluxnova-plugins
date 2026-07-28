@@ -4,29 +4,38 @@
 
     <groupId>org.finos.fluxnova.bpm</groupId>
     <artifactId>fluxnova-plugins</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Fluxnova Platform - engine plugins</name>
 
-    <modules>
-        <module>agentic</module>
-        <module>shared</module>
-        <module>agentic-subprocess</module>
-        <module>fluxnova-backward-compatibility-plugin</module>
-    </modules>
     <properties>
-        <fluxnova.version>3.0.0-SNAPSHOT</fluxnova.version>
+        <fluxnova.version>3.0.0</fluxnova.version>
         <java.version>21</java.version>
+        <skipTests>false</skipTests>
+        <skipITs>false</skipITs>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Dependency Versions -->
         <spring-boot.version>4.0.7</spring-boot.version>
         <slf4j.version>2.0.9</slf4j.version>
         <json-schema-validator.version>3.0.0</json-schema-validator.version>
         <junit.version>5.10.1</junit.version>
+
+        <!-- properties required for publishing to maven central-->
+        <plugin.version.gpg>3.2.7</plugin.version.gpg>
+        <plugin.version.release>3.3.1</plugin.version.release>
+        <plugin.version.javadoc>3.8.0</plugin.version.javadoc>
+        <plugin.version.source>3.3.1</plugin.version.source>
+        <gpg.executable>gpg</gpg.executable>
+        <release.goals>deploy org.sonatype.plugins:nexus-staging-maven-plugin:1.6.13:close</release.goals>
+        <!--    <release.goals>install org.sonatype.central:central-publishing-maven-plugin:0.9.0:publish</release.goals>-->
+        <plugin.version.publish>0.9.0</plugin.version.publish>
+        <plugin.version.deploy>3.1.4</plugin.version.deploy>
+        <publish.server.id>ossrh</publish.server.id>
+        <skip.source.attach>false</skip.source.attach>
 
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -71,7 +80,52 @@
     <build>
         <pluginManagement>
             <plugins>
-
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${plugin.version.release}</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>${release.goals}</goals>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${plugin.version.deploy}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${plugin.version.publish}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>${publish.server.id}</publishingServerId>
+                        <autoPublish>false</autoPublish>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${plugin.version.source}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${plugin.version.javadoc}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${plugin.version.gpg}</version>
+                    <configuration>
+                        <useAgent>false</useAgent>
+                        <gpgArguments>
+                            <arg>--digest-algo=SHA512</arg>
+                        </gpgArguments>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -82,11 +136,35 @@
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skipTests>${skipTests}</skipTests>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.5</version>
+                    <configuration>
+                        <skipITs>${skipITs}</skipITs>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!--
@@ -127,4 +205,131 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <name>Sonatype OSSRH Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Central Portal Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <name>OSSRH Staging</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${plugin.version.gpg}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-release-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${plugin.version.javadoc}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${plugin.version.source}</version>
+                        <configuration>
+                            <skipSource>${skip.source.attach}</skipSource>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>release-attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Fluxnova Community</name>
+        <url>http://fluxnova.finos.org</url>
+    </organization>
+
+    <url>http://fluxnova.finos.org</url>
+
+    <developers>
+        <developer>
+            <id>fluxnova.finos.org</id>
+            <name>Fluxnova Community</name>
+            <organization>fluxnova.finos.org</organization>
+            <organizationUrl>http://fluxnova.finos.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://github.com/orgs/finos/projects/116</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:https://github.com/finos/finos-fluxnova-plugins.git</connection>
+        <developerConnection>scm:git:https://github.com/finos/finos-fluxnova-plugins.git</developerConnection>
+        <url>https://github.com/finos/finos-fluxnova-plugins</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>

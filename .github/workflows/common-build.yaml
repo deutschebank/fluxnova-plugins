@@ -1,0 +1,66 @@
+name: common-build.yaml
+on:
+  workflow_call:
+    inputs:
+      project-id:
+        description: 'Project id - must match a valid key in projects.yaml file'
+        required: true
+        type: string
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  CI_DEPLOY_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
+  CI_DEPLOY_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
+
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  pull-requests: write
+  attestations: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build ${{ inputs.project-id }}
+    runs-on: ubuntu-latest
+    outputs:
+      project-path: ${{ steps.project-meta.outputs.project-path }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Resolve project metadata
+        id: project-meta
+        shell: bash
+        run: |
+          PROJECT_ID="${{ inputs.project-id }}"
+          MAP_FILE=".github/config/projects.yaml"
+          
+          PROJECT_PATH=$(yq -r ".projects.\"$PROJECT_ID\".path // \"\"" "$MAP_FILE")
+          
+          if [[ -z "$PROJECT_PATH" || "$PROJECT_PATH" == "null" ]]; then
+            echo "ERROR: Unknown project-id '$PROJECT_ID' in $MAP_FILE"
+            exit 1
+          fi
+          echo "project-path=$PROJECT_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Java setup
+        uses: ./.github/actions/java-setup
+        with:
+          project-path: ${{ steps.project-meta.outputs.project-path }}
+
+      - name: Configure git
+        uses: ./.github/actions/configure-git
+
+      - name: Download deps and plugins
+        run: |
+          mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies \
+            -f ${{ steps.project-meta.outputs.project-path }}/pom.xml \
+            -s ./settings.xml
+
+      - name: Build
+        uses: ./.github/actions/build-deploy
+        with:
+          branch: ${{ github.ref_name }}
+          project-path: ${{ steps.project-meta.outputs.project-path }}
