@@ -12,7 +12,8 @@ A Fluxnova `ProcessEnginePlugin` that scans BPMN processes for MCP-annotated sta
 
 ## Prerequisites
 
-`mcp-server-plugin` must be on the classpath (and its `ToolRegistry` bean present) for this plugin to activate.
+- `mcp-server-plugin` must be on the classpath (and its `ToolRegistry` bean present) for this plugin to activate.
+- **Jackson (`jackson-databind`)** is required at runtime for variable serialization. In Spring Boot deployments this is automatically available. For non-Spring-Boot Fluxnova deployments, you must add `jackson-databind` to the runtime classpath explicitly.
 
 ## Installation
 
@@ -86,14 +87,15 @@ Declare any optional output parameters inside `extensionElements`:
 ```xml
 <extensionElements>
   <mcp:returnVariables>
-    <mcp:returnVariable paramName="myResponseProcessVariable1" paramType="String" />
+    <mcp:returnVariable paramName="myResponseProcessVariable1" paramType="string" />
   </mcp:returnVariables>
 </extensionElements>
 ```
 
-- Note that `paramName` is case sensitive. 
+- Note that `paramName` is case sensitive.
+- The `paramType` attribute on return variables is **metadata only** — it documents the expected type for consumers (e.g., LLM clients) but is not enforced at runtime. The actual serialization is determined by the Java type of the process variable (see supported types below).
 - Any variable specified that is available in process at commit point (Asynch before/after or natural commit point like a user task or timer) will be returned at response.
-- It is the responsibility of the process designer to ensure that the response variables are suitable for LLM consumption as well as reasonable size limits. 
+- It is the responsibility of the process designer to ensure that the response variables are suitable for LLM consumption as well as reasonable size limits.
 
 Supported output `paramType` values:
 
@@ -127,8 +129,8 @@ Supported output `paramType` values:
           <mcp:parameter paramName="description" paramType="string"/>
         </mcp:parameters>
         <mcp:returnVariables>
-          <mcp:returnVariable paramName="myResponseProcessVariable1" paramType="String" />
-          <mcp:returnVariable paramName="myResponseProcessVariable2" paramType="String" />
+          <mcp:returnVariable paramName="myResponseProcessVariable1" paramType="string" />
+          <mcp:returnVariable paramName="myResponseProcessVariable2" paramType="string" />
         </mcp:returnVariables>
       </extensionElements>
     </startEvent>

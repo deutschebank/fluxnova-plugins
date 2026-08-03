@@ -33,7 +33,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jackson (provided by Spring Boot at runtime) -->
+        <!-- Jackson (provided by Spring Boot at runtime; must be added explicitly for non-Spring-Boot deployments) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>

@@ -6,9 +6,12 @@ import org.finos.fluxnova.ai.mcp.process.model.ToolParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,7 +73,8 @@ public class VariableSerializer {
      *   <li>null: returned as null</li>
      *   <li>String, Integer, Long, Boolean: returned as-is</li>
      *   <li>Date: returned as timestamp in milliseconds</li>
-     *   <li>Map: returned as-is (already JSON-compatible)</li>
+     *   <li>Map: recursively normalized (nested values are also normalized)</li>
+     *   <li>Collection/List: recursively normalized (elements are also normalized)</li>
      *   <li>Spin JSON objects: unwrapped via reflection, parsed with Jackson</li>
      *   <li>Other objects: serialized via Jackson (round-trip to Map/List/primitive)</li>
      * </ul>
@@ -94,9 +98,22 @@ public class VariableSerializer {
             return date.getTime();
         }
 
-        // Already a Map → JSON-compatible structure
-        if (value instanceof Map<?, ?>) {
-            return value;
+        // Map → recursively normalize values
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> normalized = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                normalized.put(String.valueOf(entry.getKey()), normalize(entry.getValue()));
+            }
+            return normalized;
+        }
+
+        // Collection/List → recursively normalize elements
+        if (value instanceof Collection<?> collection) {
+            List<Object> normalized = new ArrayList<>(collection.size());
+            for (Object element : collection) {
+                normalized.add(normalize(element));
+            }
+            return normalized;
         }
 
         // Spin JSON → unwrap to string → parse with Jackson

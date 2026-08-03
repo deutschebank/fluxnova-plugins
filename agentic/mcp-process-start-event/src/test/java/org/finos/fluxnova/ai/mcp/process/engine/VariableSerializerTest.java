@@ -99,7 +99,72 @@ class VariableSerializerTest {
         }
 
         @Test
-        @DisplayName("Empty Map is preserved")
+        @DisplayName("Map with nested Date values normalizes recursively")
+        void mapWithNestedDateValues() {
+            Date date = new Date(1700000000000L);
+            Map<String, Object> value = new HashMap<>();
+            value.put("createdAt", date);
+            value.put("name", "test");
+
+            Object result = serializer.normalize(value);
+
+            assertNotNull(result);
+            assertInstanceOf(Map.class, result);
+            Map<?, ?> resultMap = (Map<?, ?>) result;
+            assertEquals(1700000000000L, resultMap.get("createdAt"));
+            assertEquals("test", resultMap.get("name"));
+        }
+
+        @Test
+        @DisplayName("Map with deeply nested non-primitive values normalizes recursively")
+        void mapWithDeeplyNestedNonPrimitives() {
+            Date innerDate = new Date(1600000000000L);
+            Map<String, Object> innerMap = new HashMap<>();
+            innerMap.put("timestamp", innerDate);
+            innerMap.put("count", 42);
+
+            Map<String, Object> outerMap = new HashMap<>();
+            outerMap.put("nested", innerMap);
+            outerMap.put("label", "outer");
+
+            Object result = serializer.normalize(outerMap);
+
+            assertNotNull(result);
+            assertInstanceOf(Map.class, result);
+            Map<?, ?> resultOuter = (Map<?, ?>) result;
+            assertEquals("outer", resultOuter.get("label"));
+
+            assertInstanceOf(Map.class, resultOuter.get("nested"));
+            Map<?, ?> resultInner = (Map<?, ?>) resultOuter.get("nested");
+            assertEquals(1600000000000L, resultInner.get("timestamp"));
+            assertEquals(42, resultInner.get("count"));
+        }
+
+        @Test
+        @DisplayName("Map with List containing non-primitives normalizes recursively")
+        void mapWithListContainingNonPrimitives() {
+            Date date1 = new Date(1500000000000L);
+            Date date2 = new Date(1600000000000L);
+            Map<String, Object> value = new HashMap<>();
+            value.put("dates", List.of(date1, date2));
+            value.put("name", "schedule");
+
+            Object result = serializer.normalize(value);
+
+            assertNotNull(result);
+            assertInstanceOf(Map.class, result);
+            Map<?, ?> resultMap = (Map<?, ?>) result;
+            assertEquals("schedule", resultMap.get("name"));
+
+            assertInstanceOf(List.class, resultMap.get("dates"));
+            List<?> dates = (List<?>) resultMap.get("dates");
+            assertEquals(2, dates.size());
+            assertEquals(1500000000000L, dates.get(0));
+            assertEquals(1600000000000L, dates.get(1));
+        }
+
+        @Test
+        @DisplayName("Empty Map is preserved after recursive normalization")
         void emptyMapValue() {
             Map<String, Object> value = new HashMap<>();
             Object result = serializer.normalize(value);
