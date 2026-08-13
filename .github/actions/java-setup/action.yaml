@@ -14,7 +14,7 @@ runs:
       with:
         java-version: 21
         distribution: 'temurin'
-        server-id: ossrh
+        server-id: central
         server-username: ${{ env.CI_DEPLOY_USERNAME }}
         server-password: ${{ env.CI_DEPLOY_PASSWORD }}
 
