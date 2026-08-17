@@ -300,8 +300,7 @@ jobs:
             -DreleaseVersion=${{ env.RELEASE_VERSION }} \
             -DdevelopmentVersion=${{ env.DEVELOPMENT_VERSION }} \
             -Dtag=${{ env.TAG }} \
-            -DinteractiveMode=false \
-            -s ./settings.xml
+            -DinteractiveMode=false
 
       - name: Perform release
         if: ${{ !inputs.dry-run }}
@@ -314,8 +313,7 @@ jobs:
             -DreleaseProfiles=release \
             -Dgoals='deploy' \
             -Darguments='-DautoVersionSubmodules=true -DreleasePerform=true -DskipTests -DskipITs -Ddoclint=none' \
-            release:perform \
-            -s ./settings.xml
+            release:perform
 
       - name: Print release summary
         if: ${{ !inputs.dry-run }}
