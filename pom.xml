@@ -61,6 +61,8 @@
         <plugin.version.deploy>3.1.4</plugin.version.deploy>
         <publish.server.id>central</publish.server.id>
         <skip.source.attach>false</skip.source.attach>
+        <gpg.executable>gpg</gpg.executable>
+        <gpg.passphrase>${env.CI_GPG_PASSPHRASE}</gpg.passphrase>
 
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -148,8 +150,12 @@
                     <version>${plugin.version.gpg}</version>
                     <configuration>
                         <useAgent>false</useAgent>
+                        <passphrase>${env.CI_GPG_PASSPHRASE}</passphrase>
                         <gpgArguments>
                             <arg>--digest-algo=SHA512</arg>
+                            <arg>--no-tty</arg>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
                         </gpgArguments>
                     </configuration>
                 </plugin>
@@ -275,12 +281,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <version>${plugin.version.gpg}</version>
-                        <configuration>
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>sign-release-artifacts</id>
