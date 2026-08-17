@@ -57,7 +57,7 @@
         <plugin.version.javadoc>3.8.0</plugin.version.javadoc>
         <plugin.version.source>3.3.1</plugin.version.source>
         <release.goals>deploy</release.goals>
-        <plugin.version.central-publishing>0.7.0</plugin.version.central-publishing>
+        <plugin.version.central-publishing>0.11.0</plugin.version.central-publishing>
         <plugin.version.deploy>3.1.4</plugin.version.deploy>
         <publish.server.id>central</publish.server.id>
         <skip.source.attach>false</skip.source.attach>
