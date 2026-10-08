@@ -1,6 +1,5 @@
 package org.finos.fluxnova.ai.mcp.server.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpSyncServer;
 import org.finos.fluxnova.ai.mcp.server.plugin.McpServerFluxnovaPlugin;
 import org.finos.fluxnova.ai.mcp.server.registry.ToolRegistry;
@@ -10,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Spring Boot auto-configuration for the Fluxnova MCP Server Plugin.
@@ -24,14 +24,14 @@ public class McpServerSpringAutoConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(McpServerSpringAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ToolRegistry.class)
     public ToolRegistry toolRegistry(McpSyncServer mcpServer, ObjectMapper objectMapper) {
         LOG.debug("MCP - Server - Auto-configuring ToolRegistry bean");
         return new ToolRegistry(mcpServer, objectMapper);
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(McpServerFluxnovaPlugin.class)
     public McpServerFluxnovaPlugin fluxnovaMcpServerPlugin(ToolRegistry toolRegistry) {
         LOG.debug("MCP - Server - Auto-configuring FluxnovaMcpServerPlugin bean");
         return new McpServerFluxnovaPlugin(toolRegistry);

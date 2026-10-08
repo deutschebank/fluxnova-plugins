@@ -91,11 +91,18 @@ spring.ai.mcp.server.type=sync
           <mcp:parameter paramName="customerName" paramType="string"/>
           <mcp:parameter paramName="customerId"   paramType="string"/>
         </mcp:parameters>
+        <mcp:returnVariables>
+            <mcp:returnVariable paramName="myResponseProcessVariable1" paramType="String" />
+            <mcp:returnVariable paramName="myResponseProcessVariable2" paramType="String" />
+        </mcp:returnVariables>
+      </extensionElements>
       </bpmn:extensionElements>
     </bpmn:startEvent>
   </bpmn:process>
 </bpmn:definitions>
 ```
+See [MCP Process Start Event](mcp-process-start-event/README.md)
+for full syntax documentation
 
 #### 4. Compile and build
 
@@ -180,6 +187,6 @@ mvn clean install
 ### Requirements
 
 - Java 21+
-- Fluxnova BPM Engine 2.0.0+
-- Spring Boot 3.5.x
-- Spring AI 1.1.2
+- Fluxnova BPM Engine 3.0.0+
+- Spring Boot 4.0.x
+- Spring AI 2.0.x

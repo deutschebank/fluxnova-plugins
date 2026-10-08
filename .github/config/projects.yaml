@@ -1,0 +1,10 @@
+projects:
+  fluxnova-backward-compatibility-plugin:
+    path: fluxnova-backward-compatibility-plugin
+    tagKey: bc-plugin
+  agentic:
+    path: agentic
+    tagKey: agentic
+  agentic-subprocess:
+    path: agentic-subprocess
+    tagKey: agentic-subprocess

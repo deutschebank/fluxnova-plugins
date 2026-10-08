@@ -4,36 +4,80 @@
 
     <groupId>org.finos.fluxnova.bpm</groupId>
     <artifactId>fluxnova-plugins</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version> <!-- Do not update this version -->
     <packaging>pom</packaging>
 
     <name>Fluxnova Platform - engine plugins</name>
 
-    <modules>
-        <module>agentic</module>
-    </modules>
+    <!--
+        ╔══════════════════════════════════════════════════════════════════╗
+        ║                  DEVELOPER NOTICE - READ BEFORE EDITING          ║
+        ╠══════════════════════════════════════════════════════════════════╣
+        ║                                                                  ║
+        ║  This POM is the ROOT AGGREGATOR / BUILD PARENT only.            ║
+        ║                                                                  ║
+        ║  - It is NOT published to Maven Central or any artifact repo.    ║
+        ║  - Its version MUST NOT be changed during module releases.       ║
+        ║    (Only individual sub-project POMs are versioned/released.)    ║
+        ║                                                                  ║
+        ║  - All shared dependency versions and plugin versions must be    ║
+        ║    declared HERE in <dependencyManagement> / <pluginManagement>  ║
+        ║    and inherited by sub-projects.                                ║
+        ║                                                                  ║
+        ║  - Do NOT add module-specific dependencies directly here.        ║
+        ║    Add them in the relevant sub-project's own pom.xml.           ║
+        ║                                                                  ║
+        ║  - Override the dependency versions in the sub-project POMs,     ║
+        ║    if necessary.                                                 ║
+        ║                                                                  ║
+        ╚══════════════════════════════════════════════════════════════════╝
+    -->
+
     <properties>
+        <!-- Dependency Versions -->
+        <fluxnova.version>3.0.0</fluxnova.version>
         <java.version>21</java.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
+        <spring-boot.version>4.0.7</spring-boot.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <json-schema-validator.version>3.0.0</json-schema-validator.version>
+        <junit.version>5.10.1</junit.version>
+
+        <skipTests>false</skipTests>
+        <skipITs>false</skipITs>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Dependency Versions -->
-        <spring-boot.version>3.5.8</spring-boot.version>
-        <slf4j.version>2.0.9</slf4j.version>
-        <junit.version>5.10.1</junit.version>
+
+
+        <!-- properties required for publishing to maven central-->
+        <plugin.version.gpg>3.2.7</plugin.version.gpg>
+        <plugin.version.release>3.3.1</plugin.version.release>
+        <plugin.version.javadoc>3.8.0</plugin.version.javadoc>
+        <plugin.version.source>3.3.1</plugin.version.source>
+        <release.goals>deploy</release.goals>
+        <plugin.version.central-publishing>0.11.0</plugin.version.central-publishing>
+        <plugin.version.deploy>3.1.4</plugin.version.deploy>
+        <publish.server.id>central</publish.server.id>
+        <skip.source.attach>false</skip.source.attach>
+        <gpg.executable>gpg</gpg.executable>
+        <gpg.passphrase>${env.CI_GPG_PASSPHRASE}</gpg.passphrase>
 
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
         <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
     </properties>
+
     <dependencyManagement>
         <dependencies>
             <!-- Import Fluxnova BOM for version alignment -->
             <dependency>
                 <groupId>org.finos.fluxnova.bpm</groupId>
                 <artifactId>fluxnova-bom</artifactId>
-                <version>2.0.0</version>
+                <version>${fluxnova.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -42,16 +86,79 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.8</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Used by Spring AI MCP for JSON schema validation -->
+            <dependency>
+                <groupId>com.networknt</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>${json-schema-validator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>
-
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${plugin.version.release}</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>${release.goals}</goals>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${plugin.version.deploy}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${plugin.version.central-publishing}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>${publish.server.id}</publishingServerId>
+                        <autoPublish>false</autoPublish>
+                        <waitUntil>validated</waitUntil>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${plugin.version.source}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${plugin.version.javadoc}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${plugin.version.gpg}</version>
+                    <configuration>
+                        <useAgent>false</useAgent>
+                        <passphrase>${env.CI_GPG_PASSPHRASE}</passphrase>
+                        <gpgArguments>
+                            <arg>--digest-algo=SHA512</arg>
+                            <arg>--no-tty</arg>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
+                        </gpgArguments>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -62,11 +169,35 @@
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skipTests>${skipTests}</skipTests>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <configuration>
+                        <skipITs>${skipITs}</skipITs>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!--
@@ -107,4 +238,136 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central-snapshots</id>
+            <name>Sonatype central Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>central</id>
+            <name>Central Portal Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${plugin.version.gpg}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-release-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${plugin.version.javadoc}</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${plugin.version.source}</version>
+                        <configuration>
+                            <skipSource>${skip.source.attach}</skipSource>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>release-attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Fluxnova Community</name>
+        <url>http://fluxnova.finos.org</url>
+    </organization>
+
+    <url>http://fluxnova.finos.org</url>
+
+    <developers>
+        <developer>
+            <id>fluxnova.finos.org</id>
+            <name>Fluxnova Community</name>
+            <organization>fluxnova.finos.org</organization>
+            <organizationUrl>http://fluxnova.finos.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://github.com/orgs/finos/projects/116</url>
+    </issueManagement>
+
+    <scm child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false"
+         child.scm.url.inherit.append.path="false">
+        <connection>scm:git:https://github.com/finos/fluxnova-plugins.git</connection>
+        <developerConnection>scm:git:https://github.com/finos/fluxnova-plugins.git</developerConnection>
+        <url>https://github.com/finos/fluxnova-plugins</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>
